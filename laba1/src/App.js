@@ -2,25 +2,29 @@ import React, { useState, useEffect, useCallback, useMemo, createContext, useRef
 import TaskList from './components/TaskList';
 import TaskFilter from './components/TaskFilter';
 
-export const TaskContext = createContext();
+export const TaskContext = createContext();   //Context для зберігання списку завдань
 
 const App = () => {
+  //управління локальним станом кожного компоненту 
   const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState('all');
   const [fontSize, setFontSize] = useState('16px');
   const [taskText, setTaskText] = useState('');
-  const [editingTaskId, setEditingTaskId] = useState(null); // Статус редагування завдання
-  const inputRef = useRef(null);
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const inputRef = useRef(null);    //зберігання посилань на елементи
 
+  //Завантаження завдань з localStorage при першому рендері
   useEffect(() => {
     const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
     setTasks(savedTasks);
   }, []);
 
+  //Збереження
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
 
+  //щоб не було зайвих перерендерувань
   const addTask = useCallback((taskText) => {
     if (taskText.trim() === '') return;
     const newTask = { id: Date.now(), text: taskText, completed: false };
@@ -29,14 +33,14 @@ const App = () => {
     inputRef.current.focus();
   }, []);
 
-  // Редагування існуючого завдання
+
   const editTask = useCallback((id, newText) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
         task.id === id ? { ...task, text: newText } : task
       )
     );
-    setEditingTaskId(null); // Зупинка редагування після завершення
+    setEditingTaskId(null);
   }, []);
 
   const toggleTaskCompletion = useCallback((id) => {
@@ -51,6 +55,7 @@ const App = () => {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
   }, []);
 
+  //фільтрація завдань за статусом
   const filteredTasks = useMemo(() => {
     switch (filter) {
       case 'active':
